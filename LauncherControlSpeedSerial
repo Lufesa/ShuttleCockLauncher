@@ -1,0 +1,31 @@
+/***** goForwardAndShoot.ino
+Written by Luis Sanchez 21 February 2018 *****/
+
+int dirLeft = 7;
+int pwmLeft = 6;
+int dirRight = 4; 
+int pwmRight = 3;
+int velocityInput;
+void setup(){
+
+pinMode(dirLeft,OUTPUT);
+pinMode(pwmLeft,OUTPUT);
+pinMode(dirRight,OUTPUT);
+pinMode(pwmRight,OUTPUT);
+Serial.begin(9600); 
+}
+void loop(){                        // Reads int sent by serial communication and transfer it to launch
+if (Serial.available()){
+  //velocityInput = Serial.parseInt();
+  launch (Serial.parseInt());
+}
+}
+
+void launch (int velocityInput) {
+digitalWrite(dirLeft,HIGH); //controls the direction the motor
+digitalWrite(dirRight,HIGH);
+analogWrite(pwmLeft,velocityInput); //increase the speed of the motor from 0 to 255
+analogWrite(pwmRight,velocityInput); //decrease the speed of the motor from 255 to 0
+Serial.print("Pwm Value: ");
+Serial.print(velocityInput); //Display the value of PWM
+}
