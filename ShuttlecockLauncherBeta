@@ -1,0 +1,95 @@
+/***** ShuttlecockLauncherBeta.ino
+Written by Luis Sanchez 13 February 2018 *****/
+
+int leftLauncherDirection = 24;   //Choosing Pins for H-bridge Launcher
+int rightLauncherDirection = 25; 
+int leftLauncherSpeed = 11;
+int rightLauncherSpeed = 10;
+
+int leftWheelDirection = 26;      // Choosing Pins for H-bridge goForward
+int rightWheelDirection = 27;
+int leftWheelSpeed = 9;
+int rightWheelSpeed = 8;
+
+int encoderReaderA = 2;           // Choosing Pins for encoder
+int encoderReaderB = 3;
+
+int clicks = 0;                   // Storing variables for encoder
+int encoderValueA;
+int encoderValueB; 
+const float pi = 3.141592654;
+
+void setup(){
+  //Feeder initialization
+  
+  pinMode(leftLauncherDirection,OUTPUT);    // Launcher initialization 
+  pinMode(rightLauncherDirection,OUTPUT);
+  pinMode(leftLauncherSpeed,OUTPUT);
+  pinMode(rightLauncherSpeed,OUTPUT);
+  
+  pinMode(leftWheelDirection,OUTPUT);       // Displacement intialization
+  pinMode(rightWheelDirection,OUTPUT);
+  pinMode(leftWheelSpeed,OUTPUT);
+  pinMode(rightWheelSpeed,OUTPUT);
+  
+  pinMode(encoderReaderA,INPUT);            // Encoder initialization
+  pinMode(encoderReaderB,INPUT);          
+ 
+  Serial.begin(9600);                       // Communication initialization for debugging 
+}
+void loop(){
+  goForward(255);
+  launch (100);             // 100/255 power
+  delay(3000);
+  feedBirdie();
+  delay(3000);
+  launch(0);
+  goForward(255);
+  launch(100);              // 50/255 power
+  delay(3000);
+  feedBirdie();
+  delay(3000);
+  launch(0);
+}
+
+void launch (int launcherSpeed) {
+  Serial.print("LauncherSpeed Value: "); Serial.print(launcherSpeed); // Print the PWM value
+  digitalWrite(leftLauncherDirection ,LOW);                           // Makes the motor turn 
+  digitalWrite(rightLauncherDirection ,LOW);                          // to the speed desired from 0 to 255
+  analogWrite(leftLauncherSpeed,launcherSpeed);
+  analogWrite(rightLauncherSpeed,launcherSpeed);
+}
+
+void goForward (int forwardSpeed) {
+  Serial.print("Forwardspeed Value:"); Serial.println(forwardSpeed); // Print the PWM value
+  digitalWrite(leftWheelDirection,LOW);                              // Makes the motor turn to speed 
+  digitalWrite(rightWheelDirection,LOW);                             // desired from 0 to 255
+  analogWrite(leftWheelSpeed,forwardSpeed);
+  analogWrite(rightWheelSpeed,forwardSpeed);
+  
+  do {                                              // Open loop that runs until the n clicks are traveled
+    do { 
+      encoderValueB = encoderValueA;                // Reads the initial state of the outputA  
+      encoderValueA = digitalRead(encoderReaderA);  // Reads the "current" state of the outputA
+    } while(encoderValueA != encoderValueB);        // Keeps checking until  they are different
+                                                   
+      if(digitalRead(encoderReaderB) != encoderValueB) { 
+        clicks ++;
+      } else { 
+        clicks --;
+      }
+      Serial.print("Position: "); Serial.print(clicks*3.3*(pi/20)); Serial.println("cm");
+  } while(clicks <= 200);                           // Close loop that runs until the n clicks are traveled
+  
+  clicks = 0;
+  digitalWrite(leftWheelDirection , LOW);           // Make motor stop
+  digitalWrite(rightWheelDirection , LOW);
+  analogWrite(leftWheelSpeed,0);
+  analogWrite(rightWheelSpeed,0);
+
+  //delay(100);
+}
+
+void feedBirdie(){
+  //Code to feed one birdie
+}
