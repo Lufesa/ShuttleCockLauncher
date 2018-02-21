@@ -1,0 +1,45 @@
+/***** ShuttlecockLauncherBeta.ino
+Written by ShuttleCock Launcher Team 13 February 2018 *****/
+//#include "Servo.h"
+
+//Servo bras1;
+//Servo bras2;
+int dirLeft = 7;
+int pwmLeft = 6;
+int dirRight = 4; 
+int pwmRight = 3;
+int velocityInput;
+void setup(){
+//bras1.attach(12);
+//bras2.attach(13);
+pinMode(dirLeft,OUTPUT);
+pinMode(pwmLeft,OUTPUT);
+pinMode(dirRight,OUTPUT);
+pinMode(pwmRight,OUTPUT);
+Serial.begin(9600); 
+}
+void loop(){
+//bras1.write(153); // Horizontale
+//bras2.write(160); // Horizontale
+velocityInput = 110 ;
+launch (); // Full power = 255
+delay(5000);
+//bras1.write(80); // Verticale 
+//delay(3000);
+velocityInput = 50;   
+launch(); // 50/255 power
+delay(5000); 
+
+}
+
+void launch () {
+digitalWrite(dirLeft,HIGH); //controls the direction the motor
+digitalWrite(dirRight,HIGH);
+analogWrite(pwmLeft,velocityInput); //increase the speed of the motor from 0 to 255
+analogWrite(pwmRight,velocityInput); //decrease the speed of the motor from 255 to 0
+Serial.print("Pwm Value: ");
+Serial.print(velocityInput); //Display the value of PWM
+Serial.print(", about ");
+Serial.print(velocityInput/2.5);
+Serial.println("%");
+}
