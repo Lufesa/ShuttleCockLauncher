@@ -1,0 +1,89 @@
+/***** goForwardAndShoot.ino
+Written by Luis Sanchez 21 February 2018 *****/
+
+int leftLauncherDirection = 24;   //Choosing Pins for H-bridge Launcher
+int rightLauncherDirection = 25; 
+int leftLauncherSpeed = 11;
+int rightLauncherSpeed = 10;
+
+int leftWheelDirection1 = 26;     // Choosing Pins for H-bridge goForward    // IN1
+int leftWheelDirection2 = 27;                                                // IN2
+int rightWheelDirection1 = 28;                                               // IN3
+int rightWheelDirection2 = 29;                                               // IN4
+
+int encoderReaderA = 2;           // Choosing Pins for encoder
+int encoderReaderB = 3;
+
+int angle = 0;                   // Storing variables for encoder
+int encoderValueA;
+int encoderValueB; 
+const float pi = 3.141592654;
+
+void setup(){
+                                            //Feeder initialization
+  
+  pinMode(leftLauncherDirection,OUTPUT);    // Launcher initialization 
+  pinMode(rightLauncherDirection,OUTPUT);
+  pinMode(leftLauncherSpeed,OUTPUT);
+  pinMode(rightLauncherSpeed,OUTPUT);
+  
+  pinMode(leftWheelDirection1,OUTPUT);      // Displacement intialization
+  pinMode(leftWheelDirection2,OUTPUT);
+  pinMode(rightWheelDirection1,OUTPUT);
+  pinMode(rightWheelDirection2,OUTPUT);
+  
+  pinMode(encoderReaderA,INPUT);            // Encoder initialization
+  pinMode(encoderReaderB,INPUT);          
+ 
+  Serial.begin(9600);                       // Communication initialization for debugging 
+}
+void loop(){
+  goForward(2000);           // Choose (timelapse) for goForward and (speed, timelaps) for launch
+  //launch (100, 3000);                       // 100/255 power
+  goForward(2000);
+  //launch(50, 3000);                         // 50/255 power
+}
+
+void launch (int launcherSpeed, int timeLaps1) {
+  Serial.print("LauncherSpeed Value: "); Serial.print(launcherSpeed); // Print the PWM value
+  digitalWrite(leftLauncherDirection ,LOW);                           // Makes the motor turn 
+  digitalWrite(rightLauncherDirection ,LOW);                          // to the speed desired from 0 to 255
+  analogWrite(leftLauncherSpeed,launcherSpeed);
+  analogWrite(rightLauncherSpeed,launcherSpeed);
+  delay(timeLaps1);
+  analogWrite(leftLauncherSpeed,0);
+  analogWrite(rightLauncherSpeed,0);
+}
+
+void goForward (int timeLaps2) {
+  Serial.print("Go Forward");
+  digitalWrite(leftWheelDirection1,LOW);            // Directions need to have opposite polarity for the motor to turn
+  digitalWrite(leftWheelDirection1,HIGH);                            
+  digitalWrite(rightWheelDirection2,LOW);
+  digitalWrite(rightWheelDirection2,HIGH);
+  
+//******************
+// Put encoderCode here  
+  do {                                              // Open loop that runs until the n clicks are traveled
+    do { 
+      encoderValueB = encoderValueA;                // Reads the initial state of the outputA  
+      encoderValueA = digitalRead(encoderReaderA);  // Reads the "current" state of the outputA
+    } while(encoderValueA != encoderValueB);        // Keeps checking until  they are different
+                                                   
+      if(digitalRead(encoderReaderB) != encoderValueB) { 
+        angle ++;
+      } else { 
+        angle --;
+      }
+      Serial.print("Position: "); Serial.print(angle*3.3*(pi/20)); Serial.println("cm");
+  } while(angle <= 200);   
+//**********************
+
+  digitalWrite(leftWheelDirection1,LOW);                      
+  digitalWrite(leftWheelDirection1,LOW);                            
+  digitalWrite(rightWheelDirection2,LOW);
+  digitalWrite(rightWheelDirection2,LOW);
+  Serial.println("Motor stop");
+}
+
+
